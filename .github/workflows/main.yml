@@ -1,4 +1,4 @@
-name: Actions 😎
+name: Publish Unity app to Azure Blob storage 😎
 
 on:
   pull_request: {}
@@ -129,6 +129,26 @@ jobs:
           name: Build
           path: build
 
+  PublishApp:
+    name: Publish artifacts to Azure Blob storage
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v1
+        
+      - name: Login to Azure
+        uses: Azure/login@v1
+        with:
+          creds: ${{secrets.AZURE_CREDENTIALS}}
+          
+      - name: Publish app
+        uses: Azure/cli@v1.0.0
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az storage blob upload-batch -s $GITHUB_WORKSPACE/src/app/dist -d \$web --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }}
+  
   activateAndThenReturnLicense:
     name: returnLicense 🎈
     runs-on: ubuntu-latest
